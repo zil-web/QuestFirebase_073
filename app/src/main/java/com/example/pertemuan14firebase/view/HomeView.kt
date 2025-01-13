@@ -1,5 +1,7 @@
 package com.example.pertemuan14firebase.view
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,7 +41,7 @@ import com.example.pertemuan14firebase.ViewModel.HomeViewModel
 import com.example.pertemuan14firebase.ViewModel.PenyediaViewModel
 import com.example.pertemuan14firebase.model.Mahasiswa
 
-
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(

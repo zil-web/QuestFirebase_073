@@ -1,5 +1,7 @@
 package com.example.pertemuan14firebase.ui.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -9,7 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.pertemuan14firebase.view.HomeScreen
 import com.example.pertemuan14firebase.view.InsertMhsView
 
-
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun PengelolaHalaman(
     modifier: Modifier,
