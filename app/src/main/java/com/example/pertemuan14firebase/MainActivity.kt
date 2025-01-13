@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.pertemuan14firebase.ui.navigation.MainControllerPage
+import com.example.pertemuan14firebase.ui.navigation.PengelolaHalaman
 import com.example.pertemuan14firebase.ui.theme.Pertemuan14firebaseTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Pertemuan14firebaseTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MainControllerPage(
+                    PengelolaHalaman(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
