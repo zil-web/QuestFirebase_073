@@ -1,10 +1,7 @@
 package com.example.pertemuan14firebase.view
 
-import android.os.Build
-import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,6 +26,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -39,7 +40,6 @@ import com.example.pertemuan14firebase.ViewModel.PenyediaViewModel
 import com.example.pertemuan14firebase.model.Mahasiswa
 
 
-@RequiresExtension(extension = Build.VERSION_CODES.S,version=7)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -48,11 +48,14 @@ fun HomeScreen(
     onDetailClick: (String) -> Unit = {},
     viewModel: HomeViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ) {
-
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(title = { Text("Home")})
+            TopAppBar(
+                title = {
+                    Text("Home")
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -65,10 +68,11 @@ fun HomeScreen(
         },
     ) { innerPadding ->
         HomeStatus(
-            homeUiState = viewModel.mhsUiState,
+            homeUiState = viewModel.mhsUIState,
             retryAction = { viewModel.getMhs() }, modifier = Modifier.padding(innerPadding),
-            onDetailClick = onDetailClick, onDeleteClick = {
-                viewModel.getMhs()
+            onDetailClick = onDetailClick,
+            onDeleteClick = {
+                viewModel.deleteMhs(it)
             }
         )
     }
@@ -81,52 +85,50 @@ fun HomeStatus(
     modifier: Modifier = Modifier,
     onDeleteClick: (Mahasiswa) -> Unit = {},
     onDetailClick: (String) -> Unit
-){
+) {
     when (homeUiState) {
         is HomeUiState.Loading -> OnLoading(modifier = modifier.fillMaxSize())
         is HomeUiState.Success ->
-            if (homeUiState.mahasiswa.isEmpty()){
-                return Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Tidak ada data Mahasiswa" )
+            MhsLayout(
+                mahasiswa = homeUiState.mahasiswa, modifier = modifier.fillMaxWidth(),
+                onDetailClick = {
+                    onDetailClick(it.nim)
+                },
+                onDeleteClick = {
+                    onDeleteClick(it)
                 }
-            } else {
-                MhsLayout(
-                    mahasiswa = homeUiState.mahasiswa, modifier = modifier.fillMaxWidth(),
-                    onDetailClick = {
-                        onDetailClick(it.nim)
-                    },
-                    onDeleteClick = {
-                        onDeleteClick(it)
-                    }
-                )
-            }
-        is HomeUiState.Error -> OnError(message = homeUiState.message.message?:"Error",
-            retryAction,
-            modifier = modifier.fillMaxSize())
+            )
+        is HomeUiState.Error -> OnError(message = homeUiState.message.message?:"Error", retryAction = retryAction, modifier = modifier.fillMaxSize())
     }
 }
 
 @Composable
-fun OnLoading(modifier: Modifier = Modifier) {
-    Column (modifier = Modifier.fillMaxSize(),
+fun OnLoading(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    ){
-        Text("Loding ............")
+    ) {
+        Text("Loading.....")
     }
 }
 
 @Composable
 fun OnError(
-    message: String,
-    retryAction: () -> Unit, modifier: Modifier = Modifier) {
+    retryAction: () -> Unit,
+    modifier: Modifier = Modifier,
+    message: String
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        Text(text = message, modifier = Modifier.padding(16.dp))
+        Text(
+            text = message, modifier = Modifier.padding(16.dp)
+        )
         Button(onClick = retryAction) {
             Text("Retry")
         }
@@ -164,26 +166,28 @@ fun MhsCard(
     mahasiswa: Mahasiswa,
     modifier: Modifier = Modifier,
     onDeleteClick: (Mahasiswa) -> Unit = {}
-){
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ){
+    ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
-        ){
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 Text(
                     text = mahasiswa.nama,
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = { onDeleteClick(mahasiswa) }) {
+                IconButton(onClick = { showDialog = true }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = null,
