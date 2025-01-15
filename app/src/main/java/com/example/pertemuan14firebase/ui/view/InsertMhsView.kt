@@ -1,7 +1,5 @@
-package com.example.pertemuan14firebase.view
+package com.example.pertemuan14firebase.ui.view
 
-import android.os.Build
-import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,14 +12,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -32,44 +28,40 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.pertemuan14firebase.ViewModel.FormErrorState
-import com.example.pertemuan14firebase.ViewModel.FormState
-import com.example.pertemuan14firebase.ViewModel.InsertUiState
-import com.example.pertemuan14firebase.ViewModel.InsertViewModel
-import com.example.pertemuan14firebase.ViewModel.MahasiswaEvent
-import com.example.pertemuan14firebase.ViewModel.PenyediaViewModel
+import com.example.pertemuan14firebase.ui.ViewModel.FormErrorState
+import com.example.pertemuan14firebase.ui.ViewModel.FormState
+import com.example.pertemuan14firebase.ui.ViewModel.InsertMhsUiState
+import com.example.pertemuan14firebase.ui.ViewModel.InsertMhsViewModel
+import com.example.pertemuan14firebase.ui.ViewModel.MahasiswaEvent
+import com.example.pertemuan14firebase.ui.ViewModel.PenyediaViewModel
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsertMhsView(
     onBack: () -> Unit,
     onNavigate: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: InsertViewModel = viewModel(factory = PenyediaViewModel.Factory)
-) {
-    val uiState = viewModel.uiState // State utama untuk loading, success,error
-    val uiEvent = viewModel.uiEvent // State untuk form dan validasi
+    viewModel: InsertMhsViewModel = viewModel(factory = PenyediaViewModel.Factory)
+){
+
+    val uiState = viewModel.uiState
+    val uiEvent = viewModel.uiEvent
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    // Observasi perubahan state untuk snackbar dan navigasi
     LaunchedEffect(uiState) {
         when (uiState) {
-            is FormState.Success -> {
-                println(
-                    "InsertMhsView: uiState is FormState.Success, navigate to home " + uiState.message
-                )
+            is FormState.Success -> { println(
+                "InsertMhsView: uiState is FormState.Success, navigate to home " + uiState.message
+            )
                 coroutineScope.launch {
-                    snackbarHostState.showSnackbar(uiState.message) // Tampilkan snackbar
+                    snackbarHostState.showSnackbar(uiState.message)
                 }
                 delay(700)
-                // Navigasi langsung
                 onNavigate()
-                viewModel.resetSnackBarMessage() // Reset snackbar state
+                viewModel.resetSnackBarMessage()
             }
             is FormState.Error -> {
                 coroutineScope.launch {
@@ -82,17 +74,7 @@ fun InsertMhsView(
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("Tambah Mahasiswa") },
-                navigationIcon = {
-                    Button(onClick = onBack) {
-                        Text("Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    ){ padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -119,15 +101,15 @@ fun InsertMhsView(
 fun InsertBodyMhs(
     modifier: Modifier = Modifier,
     onValueChange: (MahasiswaEvent) -> Unit,
-    uiState: InsertUiState,
+    uiState: InsertMhsUiState,
     onClick: () -> Unit,
     homeUiState: FormState
-) {
+){
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    ){
         FormMahasiswa(
             mahasiswaEvent = uiState.insertUiEvent,
             onValueChange = onValueChange,
@@ -138,7 +120,7 @@ fun InsertBodyMhs(
             onClick = onClick,
             modifier = Modifier.fillMaxWidth(),
             enabled = homeUiState !is FormState.Loading,
-        ) {
+        ){
             if (homeUiState is FormState.Loading) {
                 CircularProgressIndicator(
                     color = Color.White,
@@ -154,6 +136,7 @@ fun InsertBodyMhs(
     }
 }
 
+
 @Composable
 fun FormMahasiswa(
     mahasiswaEvent: MahasiswaEvent = MahasiswaEvent(),
@@ -161,14 +144,26 @@ fun FormMahasiswa(
     errorState: FormErrorState = FormErrorState(),
     modifier: Modifier = Modifier
 ) {
-    val jenis_kelamin = listOf("Laki-laki", "Perempuan")
+    val jeniskelamin = listOf("Laki-laki", "Perempuan")
     val kelas = listOf("A", "B", "C", "D", "E")
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
         OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(), value = mahasiswaEvent.nama,
+            onValueChange = {
+                onValueChange(mahasiswaEvent.copy(nama = it))
+            },
+            label = { Text("Nama") },
+            isError = errorState.nama != null, placeholder = { Text("Masukkan Nama") },
+        )
+        Text(
+            text = errorState.nama ?: "", color = Color.Red
+        )
+        OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = mahasiswaEvent.nim, onValueChange = {
+            value = mahasiswaEvent.nim,
+            onValueChange = {
                 onValueChange(mahasiswaEvent.copy(nim = it))
             },
             label = { Text("NIM") },
@@ -176,45 +171,39 @@ fun FormMahasiswa(
             placeholder = { Text("Masukkan NIM") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
-        Text(text = errorState.nim ?: "", color = Color.Red)
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = mahasiswaEvent.nama,
-            onValueChange = {
-                onValueChange(mahasiswaEvent.copy(nama = it))
-            },
-            label = { Text("Nama") },
-            isError = errorState.nama != null,
-            placeholder = { Text("Masukkan nama") },
-        )
         Text(
-            text = errorState.nama ?: "",
+            text = errorState.nim ?: "",
             color = Color.Red
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Jenis Kelamin")
+        Spacer(
+            modifier = Modifier
+                .height(16.dp)
+        )
+        Text(
+            text = "Gender"
+        )
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
-            jenis_kelamin.forEach { jk ->
+            jeniskelamin.forEach { jk ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
                     RadioButton(
-                        selected = mahasiswaEvent.jenis_kelamin == jk,
+                        selected = mahasiswaEvent.jeniskelamin == jk,
                         onClick = {
-                            onValueChange(mahasiswaEvent.copy(jenis_kelamin = jk))
-                        },
+                            onValueChange(mahasiswaEvent.copy(jeniskelamin = jk))
+                        }
                     )
                     Text(
-                        text = jk,
+                        text = jk
                     )
                 }
             }
         }
         Text(
-            text = errorState.jenis_kelamin ?: "",
+            text = errorState.jeniskelamin ?: "",
             color = Color.Red
         )
         OutlinedTextField(
@@ -225,25 +214,34 @@ fun FormMahasiswa(
             },
             label = { Text("Alamat") },
             isError = errorState.alamat != null,
-            placeholder = { Text("Masukkan alamat") },
+            placeholder = { Text("Masukkan Alamat") },
         )
-        Text(text = errorState.alamat ?: "", color = Color.Red)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Kelas")
+        Text(
+            text = errorState.alamat ?: "",
+            color = Color.Red
+        )
+        Spacer(
+            modifier = Modifier
+                .height(16.dp)
+        )
+        Text(
+            text = "Kelas"
+        )
         Row {
-            kelas.forEach { kelas ->
+            kelas.forEach { kl ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
                     RadioButton(
-                        selected = mahasiswaEvent.kelas == kelas,
+                        selected = mahasiswaEvent.kelas == kl,
                         onClick = {
-                            onValueChange(mahasiswaEvent.copy(kelas =
-                            kelas))
-                        },
+                            onValueChange(mahasiswaEvent.copy(kelas = kl))
+                        }
                     )
-                    Text(text = kelas)
+                    Text(
+                        text = kl
+                    )
                 }
             }
         }
@@ -259,10 +257,12 @@ fun FormMahasiswa(
             },
             label = { Text("Angkatan") },
             isError = errorState.angkatan != null,
-            placeholder = { Text("Masukkan angkatan") },
-            keyboardOptions = KeyboardOptions(keyboardType =
-            KeyboardType.Number)
+            placeholder = { Text("Masukkan Angkatan") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
-        Text(text = errorState.angkatan ?: "", color = Color.Red)
+        Text(
+            text = errorState.angkatan ?: "",
+            color = Color.Red
+        )
     }
 }

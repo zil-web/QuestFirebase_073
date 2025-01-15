@@ -2,13 +2,12 @@ package com.example.pertemuan14firebase.model
 
 
 data class Mahasiswa (
-    val nim: String,
     val nama: String,
-    val jenis_kelamin: String,
+    val nim: String,
     val alamat: String,
     val kelas: String,
-    val angkatan: String
+    val angkatan: String,
+    val jeniskelamin: String
 ){
-    constructor():this("","","","","","")
-
+    constructor():this ("", "", "", "", "", "")
 }
