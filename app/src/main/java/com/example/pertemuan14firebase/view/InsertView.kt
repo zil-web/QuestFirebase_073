@@ -1,5 +1,7 @@
 package com.example.pertemuan14firebase.view
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +42,7 @@ import com.example.pertemuan14firebase.ViewModel.PenyediaViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsertMhsView(
